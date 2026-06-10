@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -22,6 +22,17 @@ export default function LandingScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, "Landing">>();
 
+  useEffect(() => {
+    async function checkExistingUser() {
+      const username = await AsyncStorage.getItem("gitHubUsername");
+      if (username) {
+        navigation.navigate("Map");
+      }
+    }
+
+    checkExistingUser();
+  }, []);
+
   async function handleSubmit() {
     //Make sure username is not empty
     if (!username.trim()) {
@@ -37,7 +48,7 @@ export default function LandingScreen() {
       //Check if GitHub user exist
       const gitHubUser: GitHubUser = await fetchGitHubUser(username);
       //If it exists, then we save on AsyncStorage
-      await AsyncStorage.setItem("username", username);
+      await AsyncStorage.setItem("gitHubUsername", username);
       //Navigate to Map
       navigation.navigate("Map");
     } catch (error) {
