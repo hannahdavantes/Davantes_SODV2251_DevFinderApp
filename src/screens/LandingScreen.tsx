@@ -8,6 +8,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { theme } from "../constants/theme";
 
 export default function LandingScreen() {
   const [username, setUsername] = useState("");
@@ -23,9 +24,11 @@ export default function LandingScreen() {
       <View style={styles.inner}>
         <Text style={styles.title}>DevFinder</Text>
         <Text style={styles.subtitle}>Connect with developers near you</Text>
+
         <TextInput
           style={styles.input}
           placeholder="Enter your GitHub username"
+          placeholderTextColor={theme.colors.gray6}
           value={username}
           onChangeText={setUsername}
           autoCapitalize="none"
@@ -49,54 +52,59 @@ export default function LandingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0d1117",
+    backgroundColor: theme.colors.primaryDark,
   },
   inner: {
     flex: 1,
     justifyContent: "center",
-    paddingHorizontal: 24,
+    paddingHorizontal: theme.spacing.lg,
   },
   title: {
-    fontSize: 36,
+    fontFamily: theme.typography.fontFamily,
+    fontSize: theme.typography.xxl,
     fontWeight: "bold",
-    color: "#ffffff",
-    marginBottom: 8,
+    color: theme.colors.secondaryDark,
+    marginBottom: theme.spacing.sm,
     textAlign: "center",
   },
   subtitle: {
-    fontSize: 16,
-    color: "#8b949e",
-    marginBottom: 40,
+    fontFamily: theme.typography.fontFamily,
+    fontSize: theme.typography.md,
+    color: theme.colors.tertiaryLight,
+    marginBottom: theme.spacing.xl,
     textAlign: "center",
   },
   input: {
-    backgroundColor: "#161b22",
-    color: "#ffffff",
+    fontFamily: theme.typography.fontFamily,
+    backgroundColor: theme.colors.primary,
+    color: theme.colors.white,
     borderWidth: 1,
-    borderColor: "#30363d",
+    borderColor: theme.colors.primaryLight,
     borderRadius: 8,
     padding: 14,
-    fontSize: 16,
-    marginBottom: 12,
+    fontSize: theme.typography.md,
+    marginBottom: theme.spacing.sm,
   },
   errorText: {
-    color: "#f85149",
-    fontSize: 14,
-    marginBottom: 12,
+    fontFamily: theme.typography.fontFamily,
+    color: theme.colors.secondaryLight,
+    fontSize: theme.typography.sm,
+    marginBottom: theme.spacing.sm,
   },
   button: {
-    backgroundColor: "#238636",
+    backgroundColor: theme.colors.secondary,
     borderRadius: 8,
     padding: 14,
     alignItems: "center",
   },
   buttonText: {
-    color: "#ffffff",
-    fontSize: 16,
+    fontFamily: theme.typography.fontFamily,
+    color: theme.colors.white,
+    fontSize: theme.typography.md,
     fontWeight: "600",
     textTransform: "uppercase",
   },
   loader: {
-    marginTop: 12,
+    marginTop: theme.spacing.sm,
   },
 });
