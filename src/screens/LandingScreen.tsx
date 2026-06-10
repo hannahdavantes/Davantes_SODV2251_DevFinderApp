@@ -9,14 +9,46 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "../constants/theme";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { type GitHubUser, fetchGitHubUser } from "../services/gitHubService";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../navigation/types";
 
 export default function LandingScreen() {
   const [username, setUsername] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList, "Landing">>();
 
-  function handleSubmit() {
-    console.log("Submitted:", username);
+  async function handleSubmit() {
+    //Make sure username is not empty
+    if (!username.trim()) {
+      setError("Please enter a GitHub username.");
+      return;
+    }
+
+    //Reset error/loading state
+    setError("");
+    setIsLoading(true);
+
+    try {
+      //Check if GitHub user exist
+      const gitHubUser: GitHubUser = await fetchGitHubUser(username);
+      //If it exists, then we save on AsyncStorage
+      await AsyncStorage.setItem("username", username);
+      //Navigate to Map
+      navigation.navigate("Map");
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -61,7 +93,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: theme.typography.fontFamily,
-    fontSize: theme.typography.xxl,
+    fontSize: theme.typography.xxxl,
     fontWeight: "bold",
     color: theme.colors.secondaryDark,
     marginBottom: theme.spacing.sm,

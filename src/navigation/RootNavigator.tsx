@@ -11,7 +11,10 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 export default function RootNavigator() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Landing">
+      <Stack.Navigator
+        initialRouteName="Landing"
+        screenOptions={{ headerShown: false }}
+      >
         <Stack.Screen name="Landing" component={LandingScreen} />
         <Stack.Screen name="Map" component={MapScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
