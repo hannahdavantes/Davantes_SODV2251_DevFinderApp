@@ -52,4 +52,11 @@ export const theme = {
     xxl: 36,
     xxxl: 48,
   },
+
+  borderRadius: {
+    sm: 6,
+    md: 12,
+    lg: 16,
+    full: 9999,
+  },
 };
