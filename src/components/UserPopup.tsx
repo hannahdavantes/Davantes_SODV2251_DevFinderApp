@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: theme.spacing.md,
     right: theme.spacing.md,
-    bottom: theme.spacing.lg,
+    bottom: theme.spacing.xxl,
     backgroundColor: theme.colors.primary,
     borderRadius: theme.borderRadius.lg,
     padding: theme.spacing.lg,
