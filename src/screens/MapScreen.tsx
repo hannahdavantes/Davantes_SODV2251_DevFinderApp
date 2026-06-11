@@ -6,18 +6,10 @@ import { mockUsers } from "../data/mockUsers";
 import { MockUser } from "../types/User";
 import { theme } from "../constants/theme";
 import UserMarker from "../components/UserMarker";
+import UserPopup from "../components/UserPopup";
 
 export default function MapScreen() {
   const [selectedUser, setSelectedUser] = useState<MockUser | null>(null);
-  const [loaded, setLoaded] = useState<Record<string, boolean>>({});
-
-  const handleLoad = (username: string) => {
-    //Give Android a couple of frames to finish laying out the
-    //rounded view before freezing the marker bitmap.
-    setTimeout(() => {
-      setLoaded((prev) => ({ ...prev, [username]: true }));
-    }, 300);
-  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -33,22 +25,21 @@ export default function MapScreen() {
         {mockUsers.map((user) => (
           <Marker
             key={user.username}
-            coordinate={{
-              latitude: user.latitude,
-              longitude: user.longitude,
-            }}
-            anchor={{ x: 0.5, y: 0.5 }}
-            centerOffset={{ x: 0, y: 0 }}
+            coordinate={{ latitude: user.latitude, longitude: user.longitude }}
             onPress={() => setSelectedUser(user)}
-            tracksViewChanges={!loaded[user.username]}
           >
-            <UserMarker
-              username={user.username}
-              onLoad={() => handleLoad(user.username)}
-            />
+            <UserMarker username={user.username} />
           </Marker>
         ))}
       </MapView>
+
+      {selectedUser && (
+        <UserPopup
+          user={selectedUser}
+          onClose={() => setSelectedUser(null)}
+          onViewProfile={() => {}}
+        />
+      )}
     </SafeAreaView>
   );
 }
