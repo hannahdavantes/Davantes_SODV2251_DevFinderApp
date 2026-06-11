@@ -1,10 +1,15 @@
+import { useState } from "react";
 import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MapView, { Marker } from "react-native-maps";
 import { mockUsers } from "../data/mockUsers";
+import { MockUser } from "../types/User";
 import { theme } from "../constants/theme";
 
 export default function MapScreen() {
+  const [selectedUser, setSelectedUser] = useState<MockUser | null>(null);
+  console.log(selectedUser);
+
   return (
     <SafeAreaView style={styles.container}>
       <MapView
@@ -23,8 +28,7 @@ export default function MapScreen() {
               latitude: user.latitude,
               longitude: user.longitude,
             }}
-            title={user.name}
-            description={user.username}
+            onPress={() => setSelectedUser(user)}
           />
         ))}
       </MapView>
