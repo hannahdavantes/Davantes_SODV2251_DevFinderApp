@@ -7,9 +7,15 @@ import { MockUser } from "../types/User";
 import { theme } from "../constants/theme";
 import UserMarker from "../components/UserMarker";
 import UserPopup from "../components/UserPopup";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../navigation/types";
 
 export default function MapScreen() {
   const [selectedUser, setSelectedUser] = useState<MockUser | null>(null);
+
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList, "Map">>();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -37,7 +43,9 @@ export default function MapScreen() {
         <UserPopup
           user={selectedUser}
           onClose={() => setSelectedUser(null)}
-          onViewProfile={() => {}}
+          onViewProfile={() => {
+            navigation.navigate("Profile", { username: selectedUser.username });
+          }}
         />
       )}
     </SafeAreaView>
