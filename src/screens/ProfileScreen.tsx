@@ -12,10 +12,9 @@ import { useEffect, useState } from "react";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import WebView from "react-native-webview";
 import { theme } from "../constants/theme";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-type Props = {};
-
-const ProfileScreen = (props: Props) => {
+const ProfileScreen = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, "Profile">>();
 
@@ -49,8 +48,7 @@ const ProfileScreen = (props: Props) => {
   }, []);
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Pressable
           onPress={() => navigation.goBack()}
@@ -59,12 +57,11 @@ const ProfileScreen = (props: Props) => {
             pressed && styles.backButtonPressed,
           ]}
         >
-          <Text style={styles.backButtonText}>← Back</Text>
+          <Text style={styles.backButtonText}>← Back to Map</Text>
         </Pressable>
-        <Text style={styles.headerTitle}>{username}</Text>
+        <Text style={styles.headerTitle}>GitHub @{username}</Text>
       </View>
 
-      {/* States */}
       {isLoading && (
         <View style={styles.centeredContainer}>
           <ActivityIndicator size="large" color={theme.colors.tertiary} />
@@ -82,7 +79,7 @@ const ProfileScreen = (props: Props) => {
       {user && (
         <WebView source={{ uri: user.html_url }} style={styles.webView} />
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -91,8 +88,7 @@ export default ProfileScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.primaryDark,
-    top: theme.spacing.xxl,
+    backgroundColor: theme.colors.primary,
   },
   header: {
     flexDirection: "row",

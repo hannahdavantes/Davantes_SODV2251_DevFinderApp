@@ -95,7 +95,7 @@ export default function LandingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.primaryDark,
+    backgroundColor: theme.colors.primary,
   },
   inner: {
     flex: 1,
