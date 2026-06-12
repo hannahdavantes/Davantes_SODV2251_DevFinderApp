@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { mockUsers } from "../data/mockUsers";
@@ -19,15 +19,36 @@ const DEFAULT_REGION = {
   longitudeDelta: 8,
 };
 
+const CURRENT_USER_LOCATION = {
+  latitude: 51.0447,
+  longitude: -114.0719,
+};
+
+const CURRENT_USER_REGION = {
+  ...CURRENT_USER_LOCATION,
+  latitudeDelta: 0.05,
+  longitudeDelta: 0.05,
+};
+
 export default function MapScreen() {
   const insets = useSafeAreaInsets();
 
   const [selectedUser, setSelectedUser] = useState<MockUser | null>(null);
+  const [currentUsername, setCurrentUsername] = useState<string | null>(null);
 
   const mapRef = useRef<MapView>(null);
 
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, "Map">>();
+
+  useEffect(() => {
+    async function loadUsername() {
+      const username = await AsyncStorage.getItem("gitHubUsername");
+      setCurrentUsername(username);
+    }
+
+    loadUsername();
+  }, []);
 
   async function handleLogout() {
     await AsyncStorage.removeItem("gitHubUsername");
@@ -35,14 +56,18 @@ export default function MapScreen() {
   }
 
   function handleRecenter() {
-    mapRef.current?.animateToRegion(DEFAULT_REGION, 1000);
+    mapRef.current?.animateToRegion(CURRENT_USER_REGION, 1000);
   }
 
   return (
     <View style={styles.container}>
       <View style={[styles.statusBarInset, { height: insets.top }]} />
 
-      <MapView ref={mapRef} style={styles.map} initialRegion={DEFAULT_REGION}>
+      <MapView
+        ref={mapRef}
+        style={styles.map}
+        initialRegion={CURRENT_USER_REGION}
+      >
         {mockUsers.map((user) => (
           <Marker
             key={user.username}
@@ -52,6 +77,22 @@ export default function MapScreen() {
             <UserMarker username={user.username} />
           </Marker>
         ))}
+
+        {currentUsername && (
+          <Marker
+            coordinate={CURRENT_USER_LOCATION}
+            onPress={() =>
+              setSelectedUser({
+                username: currentUsername,
+                name: currentUsername,
+                latitude: CURRENT_USER_LOCATION.latitude,
+                longitude: CURRENT_USER_LOCATION.longitude,
+              })
+            }
+          >
+            <UserMarker username={currentUsername} isCurrentUser />
+          </Marker>
+        )}
       </MapView>
 
       {selectedUser && (
@@ -73,7 +114,7 @@ export default function MapScreen() {
 
       {!selectedUser && (
         <Pressable style={styles.recenterButton} onPress={handleRecenter}>
-          <Text style={styles.recenterButtonText}>Re-center</Text>
+          <Text style={styles.recenterButtonText}>Recenter</Text>
         </Pressable>
       )}
     </View>
@@ -109,8 +150,6 @@ const styles = StyleSheet.create({
     fontFamily: theme.typography.fontFamily,
     fontWeight: "700" as const,
     fontSize: theme.typography.sm,
-    textTransform: "uppercase",
-    letterSpacing: 2,
   },
   recenterButton: {
     position: "absolute",
@@ -131,7 +170,5 @@ const styles = StyleSheet.create({
     fontFamily: theme.typography.fontFamily,
     fontWeight: "700" as const,
     fontSize: theme.typography.sm,
-    textTransform: "uppercase",
-    letterSpacing: 2,
   },
 });
