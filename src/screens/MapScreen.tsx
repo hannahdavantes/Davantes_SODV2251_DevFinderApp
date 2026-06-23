@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
-import { mockUsers } from "../data/mockUsers";
 import { MockUser } from "../types/User";
 import { theme } from "../constants/theme";
 import UserMarker from "../components/UserMarker";
@@ -11,6 +10,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/types";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getUsers } from "../services/userService";
 
 const DEFAULT_REGION = {
   latitude: 52.269,
@@ -19,13 +19,13 @@ const DEFAULT_REGION = {
   longitudeDelta: 8,
 };
 
-const CURRENT_USER_LOCATION = {
+const DEFAULT_USER_LOCATION = {
   latitude: 51.0447,
   longitude: -114.0719,
 };
 
-const CURRENT_USER_REGION = {
-  ...CURRENT_USER_LOCATION,
+const DEFAULT_USER_REGION = {
+  ...DEFAULT_USER_LOCATION,
   latitudeDelta: 0.05,
   longitudeDelta: 0.05,
 };
@@ -35,19 +35,53 @@ export default function MapScreen() {
 
   const [selectedUser, setSelectedUser] = useState<MockUser | null>(null);
   const [currentUsername, setCurrentUsername] = useState<string | null>(null);
+  const [users, setUsers] = useState<MockUser[]>([]);
 
   const mapRef = useRef<MapView>(null);
 
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, "Map">>();
 
+  const currentUser = users.find((user) => user.username === currentUsername);
+  const currentLocation = currentUser
+    ? { latitude: currentUser.latitude, longitude: currentUser.longitude }
+    : DEFAULT_USER_LOCATION;
+  const currentRegion = {
+    ...currentLocation,
+    latitudeDelta: 0.05,
+    longitudeDelta: 0.05,
+  };
+
   useEffect(() => {
-    async function loadUsername() {
+    async function load() {
       const username = await AsyncStorage.getItem("gitHubUsername");
       setCurrentUsername(username);
+
+      try {
+        const data = await getUsers();
+        setUsers(data);
+
+        const current = data.find((user) => user.username === username);
+        if (current) {
+          mapRef.current?.animateToRegion(
+            {
+              latitude: current.latitude,
+              longitude: current.longitude,
+              latitudeDelta: 0.05,
+              longitudeDelta: 0.05,
+            },
+            1000
+          );
+        }
+      } catch {
+        Alert.alert(
+          "Couldn't load community",
+          "Failed to load developers from the server."
+        );
+      }
     }
 
-    loadUsername();
+    load();
   }, []);
 
   async function handleLogout() {
@@ -56,7 +90,7 @@ export default function MapScreen() {
   }
 
   function handleRecenter() {
-    mapRef.current?.animateToRegion(CURRENT_USER_REGION, 1000);
+    mapRef.current?.animateToRegion(currentRegion, 1000);
   }
 
   return (
@@ -66,33 +100,20 @@ export default function MapScreen() {
       <MapView
         ref={mapRef}
         style={styles.map}
-        initialRegion={CURRENT_USER_REGION}
+        initialRegion={DEFAULT_USER_REGION}
       >
-        {mockUsers.map((user) => (
+        {users.map((user) => (
           <Marker
             key={user.username}
             coordinate={{ latitude: user.latitude, longitude: user.longitude }}
             onPress={() => setSelectedUser(user)}
           >
-            <UserMarker username={user.username} />
+            <UserMarker
+              username={user.username}
+              isCurrentUser={user.username === currentUsername}
+            />
           </Marker>
         ))}
-
-        {currentUsername && (
-          <Marker
-            coordinate={CURRENT_USER_LOCATION}
-            onPress={() =>
-              setSelectedUser({
-                username: currentUsername,
-                name: currentUsername,
-                latitude: CURRENT_USER_LOCATION.latitude,
-                longitude: CURRENT_USER_LOCATION.longitude,
-              })
-            }
-          >
-            <UserMarker username={currentUsername} isCurrentUser />
-          </Marker>
-        )}
       </MapView>
 
       {selectedUser && (

@@ -31,6 +31,14 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "DevFinder uses your location to show you on the map and find nearby developers."
+        }
+      ]
+    ]
   }
 }
