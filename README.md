@@ -9,11 +9,12 @@ Built for **SODV2251 — Mobile Application Development**, Project 2: *Write Use
 ## Features
 
 - **Sign in with GitHub** — enter a GitHub username, validated against the GitHub API, persisted locally so you stay signed in
-- **Community map** — see other developers as avatar markers on a map of Alberta
+- **Saved profiles** — first-time sign-in creates a profile (username, name, GPS location) on the json-server backend
+- **Community map** — see other developers as avatar markers, sourced live from the backend
 - **User popups** — tap a marker to see a quick info card with a "View Profile" action
 - **Profile view** — opens the selected user's real GitHub profile page
-- **Your location** — a distinct, larger marker shows your own position on the map
-- **Map controls** — recenter to your location, and log out
+- **Your location** — a distinct, larger marker shows your own saved position on the map
+- **Map controls** — recenter to your saved location, and log out
 
 ---
 
@@ -26,6 +27,8 @@ Built for **SODV2251 — Mobile Application Development**, Project 2: *Write Use
 - [react-native-webview](https://github.com/react-native-webview/react-native-webview)
 - [AsyncStorage](https://react-native-async-storage.github.io/async-storage/) for local session persistence
 - [GitHub REST API](https://docs.github.com/en/rest/users/users) for user data
+- [json-server](https://github.com/typicode/json-server) for the local profile/location backend
+- [expo-location](https://docs.expo.dev/versions/latest/sdk/location/) for real GPS coordinates
 
 ---
 
@@ -43,6 +46,21 @@ Built for **SODV2251 — Mobile Application Development**, Project 2: *Write Use
 ```bash
 npm install
 ```
+
+### Run the backend
+
+The app reads/writes profiles via a local [json-server](https://github.com/typicode/json-server) backend, seeded from `db.json`. Start it in its own terminal:
+
+```bash
+npm run server
+```
+
+This binds to all network interfaces (`--host 0.0.0.0`) so it's reachable from a physical device, not just this machine, at `http://<your-LAN-IP>:3001/users`.
+
+The app's base URL is configured in `src/constants/api.ts` — `localhost` only works from an iOS simulator, since a physical device or the Android emulator can't reach your machine's `localhost`:
+
+- **Android emulator**: use `http://10.0.2.2:3001`
+- **Physical device (e.g. Expo Go on a phone)**: use your machine's LAN IP, e.g. `http://192.168.1.23:3001` (find it with `ipconfig` on Windows; device and dev machine must be on the same Wi-Fi network, and the IP can change if you reconnect)
 
 ### Run the app
 
@@ -83,15 +101,17 @@ src/
 
   services/
     gitHubService.ts     GitHub API calls
-
-  data/
-    mockUsers.ts         Mock community member data
+    userService.ts       json-server calls to read/create saved profiles
+    locationService.ts   Device GPS location via expo-location
 
   types/
     User.ts              Shared type definitions
 
   constants/
     theme.ts             Colors, spacing, typography, border radius
+    api.ts               Backend base URL
+
+db.json                  json-server database (profiles, seeded with sample users)
 ```
 
 ---
@@ -99,13 +119,12 @@ src/
 ## Known Limitations
 
 - **Android marker clipping**: avatar images inside map markers don't render as perfect circles on Android due to a `react-native-maps` platform limitation. iOS renders correctly.
-- **Hardcoded location**: the "your location" marker uses a fixed coordinate (Calgary) rather than real GPS, to keep the project focused on UI, navigation, and state.
+- **Local-only backend**: `db.json` lives on the dev machine, so the base URL in `src/constants/api.ts` needs adjusting per device (see "Run the backend" above).
 - A brief flash of the sign-in form may appear on cold start before the saved session is checked.
 
 ---
 
-## Future Work (Project 3)
+## Future Work
 
-- Replace mock community data with a real backend (JSON-Server or similar)
-- Real GPS-based location via `expo-location`
-- Full user registration flow
+- Full user registration flow (editable name/avatar, not just GitHub username lookup)
+- Deploy the backend so it isn't tied to a single dev machine's IP

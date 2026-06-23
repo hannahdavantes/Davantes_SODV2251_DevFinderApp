@@ -11,9 +11,30 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "../constants/theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { type GitHubUser, fetchGitHubUser } from "../services/gitHubService";
+import { getUser, createUser } from "../services/userService";
+import { getCurrentUserLocation } from "../services/locationService";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/types";
+
+const DEFAULT_USER_LOCATION = {
+  latitude: 51.0447,
+  longitude: -114.0719,
+};
+
+//Creates a saved profile on first login; returning users are left as-is
+async function ensureUserProfile(username: string, fallbackName: string) {
+  const existingProfile = await getUser(username);
+  if (existingProfile) return;
+
+  const location = (await getCurrentUserLocation()) ?? DEFAULT_USER_LOCATION;
+  await createUser({
+    username,
+    name: fallbackName,
+    latitude: location.latitude,
+    longitude: location.longitude,
+  });
+}
 
 export default function LandingScreen() {
   const [username, setUsername] = useState("");
@@ -47,6 +68,10 @@ export default function LandingScreen() {
     try {
       //Check if GitHub user exist
       const gitHubUser: GitHubUser = await fetchGitHubUser(username);
+
+      //Create a saved profile for first-time logins
+      await ensureUserProfile(username, gitHubUser.name ?? username);
+
       //If it exists, then we save on AsyncStorage
       await AsyncStorage.setItem("gitHubUsername", username);
       //Navigate to Map
